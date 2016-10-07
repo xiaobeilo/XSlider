@@ -20,17 +20,17 @@
             /*left:-1920px;*/
             left:0;
             top:0;
+            list-style: none;
         }
         .banner li{
             float:left;
             width:1920px;
             height:665px;
-            /*-webkit-transition: all 0.1s;*/
-            /*-moz-transition: all 0.1s;*/
-            /*-ms-transition: all 0.1s;*/
-            /*-o-transition: all 0.1s;*/
-            /*transition: all 0.1s;*/
             color:#fff;
+            font-size:24px;
+            font-weight:bold;
+            margin-top:100px;
+            text-align:center;
         }
         .idxs{
             width:300px;
@@ -82,18 +82,22 @@
         <li>这是2</li>
         <li>这是3</li>
         <li>这是4</li>
+        <li>这是5</li>
     </ul>
     <ul class="idxs">
         <li class="on">1</li>
         <li>2</li>
         <li>3</li>
         <li>4</li>
+        <li>5</li>
     </ul>
     <a href="javascript:;" class="left">&lt;</a>
     <a href="javascript:;" class="right">&gt;</a>
 </section>
-<script src="banner.js">
-
+<script src="XSlider.js"></script>
+<script>
+    var slider = new XSlider('slider',{type:'js',timing:'ease',autoPlay:true,
+        trigger:'click'});
 </script>
 </body>
 </html>
