@@ -11,8 +11,8 @@ var XSlider = null;
         this.iLi = document.querySelectorAll(id+' .idxs li');
         this.left = document.querySelector(id+' .left');
         this.right= document.querySelector(id+' .right');
-        this.WIDTH=0;
-        this.HEIGHT=0;
+        this.WIDTH=1920;
+        this.HEIGHT=600;
         this.scale=0;
         this.type = 'js';
         this.trigger = 'mouseover';
@@ -31,28 +31,30 @@ var XSlider = null;
     XSlider.prototype.init = function(){
         var me = this;
         !function(){
-            var w = parseFloat(getComputedStyle(me.slider).width);
-            var h = parseFloat(getComputedStyle(me.slider).height);
+            var w = parseFloat(getStyle(me.slider,'width'));
+            var h = parseFloat(getStyle(me.slider,'height'));
             me.scale = h/w;
         }();
         this.resize();
-        window.addEvent('resize',this.resize.bind(this));
+        addEvent(window,'resize',this.resize.bind(this));
         for(var i=0;i<this.bLi.length;i++){
-            this.bLi[i].dataset.i = i;
-            this.iLi[i].dataset.i = i;
+            dataset(this.bLi[i],'i',i);
+            dataset(this.iLi[i],'i',i);
         }
         this.bUl.insertBefore(this.bLi[this.bLi.length-1],this.bLi[0]);
-        if(this.type === 'css'){
-            this.right.addEvent(this.trigger,this.animate.bind(this,1,1,1));
-            this.left.addEvent(this.trigger,this.animate.bind(this,-1,1,1));
-        }else{
-            this.right.addEvent(this.trigger,this.move.bind(this,1,1,1));
-            this.left.addEvent(this.trigger,this.move.bind(this,-1,1,1));
+        if(this.right && this.left){
+            if(this.type === 'css'){
+                addEvent(this.right,this.trigger,this.animate.bind(this,1,1,1));
+                addEvent(this.left,this.trigger,this.animate.bind(this,-1,1,1));
+            }else{
+                addEvent(this.right,this.trigger,this.move.bind(this,1,1,1));
+                addEvent(this.left,this.trigger,this.move.bind(this,-1,1,1));
+            }
         }
-        this.iUl.addEvent(this.trigger,function(event){
+        addEvent(this.iUl,this.trigger,function(event){
             if(me.isRun()) return false;
-            var target = event.target || window.event.target;
-            if(target.nodeName === 'LI' && target.className !== 'on'){
+            var target = event.target || event.srcElement;
+            if(target['nodeName'?'nodeName':'tagName'] === 'LI' && target.className !== 'on'){
                 for(var i=0;i<me.iLi.length;i++){
                     if(me.iLi[i].className === 'on'){
                         var preI = me.iLi[i].getAttribute('data-i');
@@ -79,12 +81,13 @@ var XSlider = null;
         });
     };
     XSlider.prototype.animate = function(dir,count,_count){
-        getComputedStyle(this.bUl).transition.match(/(\d?\.?\d+)(s|ms)/i);
+        // getComputedStyle(this.bUl).transition.match(/(\d?\.?\d+)(s|ms)/i);
+        getStyle(this.bUl,'transition').match(/(\d?\.?\d+)(s|ms)/i);
         if(parseFloat(RegExp.$1) > 0) return false;
         var me = this;
         transition(this.bUl,'transform '+this.stepDur/_count+'ms '+this.timing);
         transform(this.bUl,'translateX('+(-this.WIDTH -dir*me.WIDTH)+'px)');
-        this.bUl.addEvent('transitionend',function(){
+        addEvent(this.bUl,'transitionend',function(){
             transform(me.bUl,'translateX('+-me.WIDTH+'px)');
             transition(me.bUl,'transform 0ms');
             this.removeEventListener('transitionend',arguments.callee);
@@ -96,7 +99,7 @@ var XSlider = null;
         var me = this;
         var moved = 0;
         this.timer = setInterval(function(){
-            var curPos = parseFloat(getComputedStyle(me.bUl).left);
+            var curPos = parseFloat(getStyle(me.bUl,'left'));
             me.bUl.style.left = curPos - dir*me.step + 'px';
             var n = me.WIDTH - moved;
             if(n <= me.step){
@@ -155,10 +158,10 @@ var XSlider = null;
             }
             this.iLi[idx].className = 'on';
         }
-    }
+    };
     XSlider.prototype.isRun = function(){
         if(this.type === 'css'){
-            getComputedStyle(this.bUl).transition.match(/(\d?\.?\d+)(s|ms)/i);
+            getStyle(this.bUl,'transition').match(/(\d?\.?\d+)(s|ms)/i);
             if(parseFloat(RegExp.$1) > 0){
                 return true;
             }else{
@@ -173,12 +176,12 @@ var XSlider = null;
 
         }
 
-    }
+    };
     XSlider.prototype.autoPlayNext = function(){
         var me = this;
         var h = null;
-        this.slider.addEvent('mouseover',function(){clearTimeout(h); })
-        this.slider.addEvent('mouseout',function(){repeat();})
+        addEvent(this.slider,'mouseover',function(){clearTimeout(h); })
+        addEvent(this.slider,'mouseout',function(){repeat();})
         function repeat(){
             h = setInterval(function(){
                 if(me.type === 'css'){me.animate(1,1,1);
@@ -186,7 +189,7 @@ var XSlider = null;
             },me.duration)
         }
         repeat();
-    }
+    };
     function transform(ele,prop){
         var arr = ['transform','WebKitTransform','MozTransform','OTransform','MsTransform'];
         for(var i=0;i<4;i++){
@@ -199,11 +202,26 @@ var XSlider = null;
             ele.style[arr[i]] = prop;
         }
     }
-    Object.prototype.addEvent = function (ev,fn) {
-        if(this.attachEvent){
-            this.attachEvent('on'+ev,fn);
+    function addEvent (ele,evt,fn){
+        if(ele.attachEvent){
+            ele.attachEvent('on'+evt,fn);
         }else{
-            this.addEventListener(ev,fn,false);
+            ele.addEventListener(evt,fn,false);
+        }
+    }
+    function getStyle(ele,attr){
+        if(window.getComputedStyle){
+            return getComputedStyle(ele)[attr];
+        }else{
+            return ele.currentStyle[attr];
+        }
+    }
+    function dataset(ele,attr,val){
+        if(ele.dataset){
+            ele.dataset[attr] = val;
+        }else{
+            // ele['data-'+attr] = val;
+            ele.setAttribute('data-'+attr,val);
         }
     }
 }();
