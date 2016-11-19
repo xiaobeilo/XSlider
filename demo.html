@@ -17,7 +17,6 @@
             position:absolute;
             padding:0;
             margin:0;
-            /*left:-1920px;*/
             left:0;
             top:0;
             list-style: none;
@@ -72,7 +71,6 @@
         #slider .right{
             right:0;
         }
-
     </style>
 </head>
 <body>
@@ -94,10 +92,12 @@
     <a href="javascript:;" class="left">&lt;</a>
     <a href="javascript:;" class="right">&gt;</a>
 </section>
-<script src="xslider.js"></script>
+<script src="XSlider.js"></script>
 <script>
-   var slider = new XSlider('slider',{type:'js',timing:'ease',autoPlay:false,
-       trigger:'click',duration:10000});
+//    var slider = new XSlider('slider',{type:'css',timing:'ease',autoPlay:true,trigger:'click'});
+    var slider = new XSlider('slider',{
+        autoPlay:false
+    });
 </script>
 </body>
 </html>

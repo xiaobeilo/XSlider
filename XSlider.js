@@ -14,8 +14,9 @@ var XSlider = null;
         this.WIDTH=1920;
         this.HEIGHT=600;
         this.scale=0;
+        this.autoResize = true;
         this.type = 'js';
-        this.trigger = 'mouseover';
+        this.trigger = 'click';
         this.timing = 'linear';
         this.ctrScale = false;
         this.autoPlay = true;
@@ -27,7 +28,7 @@ var XSlider = null;
         this.stepinter = this.stepDur/this.step;
         this.init();
         this.autoPlay && this.autoPlayNext();
-    }
+    };
     XSlider.prototype.init = function(){
         var me = this;
         !function(){
@@ -35,21 +36,20 @@ var XSlider = null;
             var h = parseFloat(getStyle(me.slider,'height'));
             me.scale = h/w;
         }();
-        this.resize();
-        addEvent(window,'resize',this.resize.bind(this));
+        if(this.type === 'js'){
+            this.bUl.style.left = -this.WIDTH + 'px';
+        }else{
+            transform(this.bUl,'translateX('+-this.WIDTH+'px)')
+        }
+        this.autoResize && addEvent(window,'resize',this.resize.bind(this));
         for(var i=0;i<this.bLi.length;i++){
             dataset(this.bLi[i],'i',i);
             dataset(this.iLi[i],'i',i);
         }
         this.bUl.insertBefore(this.bLi[this.bLi.length-1],this.bLi[0]);
         if(this.right && this.left){
-            if(this.type === 'css'){
-                addEvent(this.right,this.trigger,this.animate.bind(this,1,1,1));
-                addEvent(this.left,this.trigger,this.animate.bind(this,-1,1,1));
-            }else{
-                addEvent(this.right,this.trigger,this.move.bind(this,1,1,1));
-                addEvent(this.left,this.trigger,this.move.bind(this,-1,1,1));
-            }
+            addEvent(this.right,this.trigger,this[this.type==='css'?'animate':'move'].bind(this,1,1,1));
+            addEvent(this.left,this.trigger,this[this.type==='css'?'animate':'move'].bind(this,-1,1,1));
         }
         addEvent(this.iUl,this.trigger,function(event){
             if(me.isRun()) return false;
@@ -119,12 +119,7 @@ var XSlider = null;
         this.slider.style.height = this.HEIGHT + 'px';
         this.bUl.style.width  = this.WIDTH * this.bLi.length + 'px';
         this.bUl.style.height  = this.bLi.HEIGHT + 'px';
-        if(this.type === 'js'){
-            this.bUl.style.left = -this.WIDTH + 'px';
 
-        }else{
-            transform(this.bUl,'translateX('+-this.WIDTH+'px)')
-        }
         for(var i=0;i<this.bLi.length;i++){
             this.bLi[i].style.width = this.WIDTH + 'px';
             this.bLi[i].style.height = this.HEIGHT + 'px';
@@ -189,6 +184,20 @@ var XSlider = null;
             },me.duration)
         }
         repeat();
+    };
+    XSlider.prototype.next = function(){
+        if(this.type==='css'){
+            this.animate(1,1,1);
+        }else{
+            this.move(1,1,1)
+        }
+    };
+    XSlider.prototype.prev = function(){
+        if(this.type==='css'){
+            this.animate(-1,1,1);
+        }else{
+            this.move(-1,1,1)
+        }
     };
     function transform(ele,prop){
         var arr = ['transform','WebKitTransform','MozTransform','OTransform','MsTransform'];
